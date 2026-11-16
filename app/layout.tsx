@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/navbar";
+import Providers from "@/components/providers";
 import SiteFooter from "@/components/siteFooter";
 import { BASE_PATH, SITE_NAME, SITE_URL, socialMetadata } from "@/lib/site";
 
@@ -62,8 +63,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${inter.variable} h-full antialiased`}>
       <body className="flex min-h-svh flex-col bg-background text-foreground">
-        <Navbar />
-        {children}
+        <Providers>
+          <Navbar />
+          {children}
+        </Providers>
         <SiteFooter />
       </body>
     </html>

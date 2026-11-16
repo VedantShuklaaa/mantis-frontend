@@ -1,0 +1,85 @@
+/*
+ * Light-theme overrides for @solana/wallet-adapter-react-ui.
+ * The library ships a dark modal; these rules re-skin it with Mantis tokens.
+ */
+.wallet-adapter-modal .wallet-adapter-modal-wrapper {
+  background: var(--card);
+  color: var(--foreground);
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) + 4px);
+  box-shadow: 0 24px 60px -24px rgb(24 27 24 / 35%);
+  font-family: var(--font-sans);
+}
+
+.wallet-adapter-modal .wallet-adapter-modal-overlay {
+  background: rgb(24 27 24 / 32%);
+  backdrop-filter: blur(2px);
+}
+
+.wallet-adapter-modal .wallet-adapter-modal-title {
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  font-size: 1.125rem;
+  font-weight: 600;
+  line-height: 1.5;
+  padding: 40px 32px 16px;
+}
+
+.wallet-adapter-modal .wallet-adapter-modal-list {
+  padding: 0 8px;
+}
+
+.wallet-adapter-modal .wallet-adapter-modal-list .wallet-adapter-button {
+  height: 2.75rem;
+  padding: 0 12px;
+  border-radius: var(--radius-md);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.wallet-adapter-modal .wallet-adapter-button:not([disabled]):hover {
+  background-color: var(--muted);
+  color: var(--foreground);
+}
+
+.wallet-adapter-modal .wallet-adapter-button:not([disabled]):focus-visible {
+  outline-color: var(--ring);
+}
+
+.wallet-adapter-modal .wallet-adapter-button[disabled] {
+  background: var(--muted);
+  color: var(--muted-foreground);
+}
+
+.wallet-adapter-modal .wallet-adapter-modal-button-close {
+  background: var(--muted);
+  border-radius: 9999px;
+}
+
+.wallet-adapter-modal .wallet-adapter-modal-button-close svg {
+  fill: var(--muted-foreground);
+}
+
+.wallet-adapter-modal .wallet-adapter-modal-button-close:hover svg {
+  fill: var(--foreground);
+}
+
+.wallet-adapter-modal .wallet-adapter-modal-list-more {
+  color: var(--muted-foreground);
+  font-family: var(--font-sans);
+}
+
+.wallet-adapter-modal .wallet-adapter-modal-list-more svg {
+  fill: currentColor;
+}
+
+.wallet-adapter-modal .wallet-adapter-modal-middle-button {
+  background: var(--foreground);
+  color: var(--background);
+  border-radius: var(--radius-md);
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+}

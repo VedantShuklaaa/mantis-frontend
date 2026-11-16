@@ -2,6 +2,31 @@ import type { NextConfig } from "next";
 
 const isDev = process.env.NODE_ENV === "development";
 
+/* Allow the configured devnet RPC (and its websocket twin) through connect-src. */
+function rpcConnectSources() {
+  const endpoint = process.env.NEXT_PUBLIC_RPC_URL;
+  if (!endpoint) return [];
+
+  try {
+    const url = new URL(endpoint);
+    const sources = [url.origin];
+    const socketProtocol =
+      url.protocol === "https:" ? "wss:" : url.protocol === "http:" ? "ws:" : null;
+    if (socketProtocol) sources.push(`${socketProtocol}//${url.host}`);
+    return sources;
+  } catch {
+    return [];
+  }
+}
+
+const connectSources = [
+  "'self'",
+  ...(isDev ? ["ws:"] : []),
+  "https://api.devnet.solana.com",
+  "wss://api.devnet.solana.com",
+  ...rpcConnectSources(),
+];
+
 /*
  * Static-friendly CSP (no per-request nonce, so pages stay prerenderable).
  * Next.js emits inline bootstrap scripts, and React/motion set inline style
@@ -13,7 +38,7 @@ const contentSecurityPolicy = [
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' blob: data:",
   "font-src 'self' data:",
-  `connect-src 'self'${isDev ? " ws:" : ""} https://api.devnet.solana.com wss://api.devnet.solana.com`,
+  `connect-src ${connectSources.join(" ")}`,
   "object-src 'none'",
   "base-uri 'self'",
   "form-action 'self'",

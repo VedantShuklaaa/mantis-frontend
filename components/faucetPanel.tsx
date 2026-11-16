@@ -2,7 +2,9 @@
 
 import { useState, type ChangeEvent, type SubmitEvent } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { ArrowRight, Check, CircleAlert, Loader2 } from "lucide-react";
+import { ArrowRight, Check, CircleAlert, Loader2, Wallet } from "lucide-react";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import SpecularButton from "@/components/SpecularButton";
 import { PRIMARY_SPECULAR } from "@/lib/specular";
 
@@ -20,6 +22,8 @@ async function claimMan(multiplier: number): Promise<void> {
 }
 
 export default function FaucetPanel() {
+	const { connected, connecting } = useWallet();
+	const { setVisible } = useWalletModal();
 	const [value, setValue] = useState("");
 	const [status, setStatus] = useState<Status>("idle");
 	const [message, setMessage] = useState<string | null>(null);
@@ -51,6 +55,11 @@ export default function FaucetPanel() {
 
 	const handleConfirm = async () => {
 		if (pending) return;
+
+		if (!connected) {
+			setVisible(true);
+			return;
+		}
 
 		if (!isValid) {
 			setStatus("error");
@@ -172,26 +181,38 @@ export default function FaucetPanel() {
 						<SpecularButton
 							{...PRIMARY_SPECULAR}
 							type="submit"
-							disabled={pending}
+							disabled={pending || connecting}
 							className="w-full"
 						>
-							{pending ? (
+							{pending || connecting ? (
 								<>
 									<Loader2
 										className="size-4 animate-spin"
 										strokeWidth={1.75}
 										aria-hidden
 									/>
-									Claiming…
+									{pending ? "Claiming…" : "Connecting…"}
 								</>
 							) : (
 								<>
-									{isValid ? `Claim ${multiplier} MAN` : "Claim MAN"}
-									<ArrowRight
-										className="size-4"
-										strokeWidth={1.75}
-										aria-hidden
-									/>
+									{connected
+										? isValid
+											? `Claim ${multiplier} MAN`
+											: "Claim MAN"
+										: "Connect wallet"}
+									{connected ? (
+										<ArrowRight
+											className="size-4"
+											strokeWidth={1.75}
+											aria-hidden
+										/>
+									) : (
+										<Wallet
+											className="size-4"
+											strokeWidth={1.75}
+											aria-hidden
+										/>
+									)}
 								</>
 							)}
 						</SpecularButton>

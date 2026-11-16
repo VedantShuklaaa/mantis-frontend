@@ -1,31 +1,14 @@
 import type { NextConfig } from "next";
+import { BASE_PATH } from "./lib/paths";
 
 const isDev = process.env.NODE_ENV === "development";
 
-/* Allow the configured devnet RPC (and its websocket twin) through connect-src. */
-function rpcConnectSources() {
-  const endpoint = process.env.NEXT_PUBLIC_RPC_URL;
-  if (!endpoint) return [];
-
-  try {
-    const url = new URL(endpoint);
-    const sources = [url.origin];
-    const socketProtocol =
-      url.protocol === "https:" ? "wss:" : url.protocol === "http:" ? "ws:" : null;
-    if (socketProtocol) sources.push(`${socketProtocol}//${url.host}`);
-    return sources;
-  } catch {
-    return [];
-  }
-}
-
-const connectSources = [
-  "'self'",
-  ...(isDev ? ["ws:"] : []),
-  "https://api.devnet.solana.com",
-  "wss://api.devnet.solana.com",
-  ...rpcConnectSources(),
-];
+/*
+ * The browser only talks to our same-origin JSON-RPC proxy
+ * (`app/api/rpc/route.ts`); the upstream RPC URL stays server-side, so no
+ * external RPC origins need to be allowed here.
+ */
+const connectSources = ["'self'", ...(isDev ? ["ws:"] : [])];
 
 /*
  * Static-friendly CSP (no per-request nonce, so pages stay prerenderable).
@@ -82,7 +65,7 @@ const nextConfig: NextConfig = {
       },
     },
   },
-  basePath: "/mantis",
+  basePath: BASE_PATH,
   async headers() {
     return [
       {

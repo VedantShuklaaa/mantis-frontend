@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
+import { BASE_PATH } from "@/lib/paths";
 
 /** Public origin that hosts the app. */
 export const SITE_URL = "https://projects.vedantshukla.in";
 
-/** The app is mounted under this sub-path (mirrors `basePath` in next.config.ts). */
-export const BASE_PATH = "/mantis";
+export { BASE_PATH };
 
 export const SITE_NAME = "Mantis";
 

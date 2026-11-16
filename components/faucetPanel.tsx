@@ -2,31 +2,46 @@
 
 import { useState, type ChangeEvent, type SubmitEvent } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { ArrowRight, Check, CircleAlert, Loader2, Wallet } from "lucide-react";
-import { useWallet } from "@solana/wallet-adapter-react";
+import {
+	ArrowRight,
+	Check,
+	CircleAlert,
+	ExternalLink,
+	Loader2,
+	Wallet,
+} from "lucide-react";
+import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
+import ClaimStatus from "@/components/claimStatus";
 import SpecularButton from "@/components/SpecularButton";
+import { useUserClaim } from "@/hooks/useUserClaim";
+import { claimMan, describeClaimError } from "@/lib/claim";
+import { BASE_CLAIM, MAX_MULTIPLIER, MAX_PER_WINDOW } from "@/lib/constants";
+import { formatMan } from "@/lib/format";
 import { PRIMARY_SPECULAR } from "@/lib/specular";
 
-const BASE_CLAIM_CLAW = 1_000_000; // 1 MAN in claw, same as BASE_CLAIM in the program
-const MAX_MULTIPLIER = 3;
 const OPTIONS = Array.from({ length: MAX_MULTIPLIER }, (_, i) => i + 1);
 
-const CLAW_FORMAT = new Intl.NumberFormat("en-US");
 type Status = "idle" | "pending" | "success" | "error";
 
-// TODO: replace with the real Anchor call: program.methods.claim(multiplier)
-async function claimMan(multiplier: number): Promise<void> {
-	console.log("claim", multiplier);
-	await new Promise((resolve) => setTimeout(resolve, 1200));
+function explorerUrl(signature: string): string {
+	return `https://explorer.solana.com/tx/${signature}?cluster=devnet`;
+}
+
+function shortenSignature(signature: string): string {
+	return `${signature.slice(0, 8)}…${signature.slice(-8)}`;
 }
 
 export default function FaucetPanel() {
-	const { connected, connecting } = useWallet();
+	const { connection } = useConnection();
+	const { connected, connecting, wallet, sendTransaction } = useWallet();
 	const { setVisible } = useWalletModal();
+	const claimStatus = useUserClaim();
+
 	const [value, setValue] = useState("");
 	const [status, setStatus] = useState<Status>("idle");
 	const [message, setMessage] = useState<string | null>(null);
+	const [signature, setSignature] = useState<string | null>(null);
 
 	const multiplier = Number(value);
 	const isValid =
@@ -40,6 +55,7 @@ export default function FaucetPanel() {
 	const resetFeedback = () => {
 		setStatus("idle");
 		setMessage(null);
+		setSignature(null);
 	};
 
 	const handleInput = (e: ChangeEvent<HTMLInputElement>) => {
@@ -67,15 +83,33 @@ export default function FaucetPanel() {
 			return;
 		}
 
+		if (!wallet) {
+			setStatus("error");
+			setMessage("Wallet unavailable. Reconnect and try again.");
+			return;
+		}
+
 		try {
 			setStatus("pending");
 			setMessage(null);
-			await claimMan(multiplier);
+			setSignature(null);
+
+			const transactionSignature = await claimMan({
+				connection,
+				wallet: wallet.adapter,
+				sendTransaction,
+				multiplier,
+			});
+
+			setSignature(transactionSignature);
 			setStatus("success");
-			setMessage(`${multiplier} MAN sent to your wallet.`);
-		} catch {
+			setMessage(
+				`${formatMan(multiplier * BASE_CLAIM)} MAN sent to your wallet.`,
+			);
+			void claimStatus.refresh();
+		} catch (error) {
 			setStatus("error");
-			setMessage("Claim failed. Check your wallet and your 24h limit.");
+			setMessage(describeClaimError(error));
 		}
 	};
 
@@ -91,12 +125,24 @@ export default function FaucetPanel() {
 					Claim devnet MAN
 				</h1>
 				<p className="mt-2 max-w-sm text-sm leading-6 text-muted-foreground">
-					Up to {MAX_MULTIPLIER} MAN every 24 hours on Solana devnet.
+					Up to {formatMan(MAX_PER_WINDOW)} MAN every 24 hours on Solana
+					devnet.
 				</p>
+
+				<div className="mt-5">
+					<ClaimStatus
+						connected={claimStatus.connected}
+						loading={claimStatus.loading}
+						claimed={claimStatus.claimed}
+						remaining={claimStatus.remaining}
+						resetSeconds={claimStatus.resetSeconds}
+						error={claimStatus.error}
+					/>
+				</div>
 
 				<form
 					onSubmit={handleSubmit}
-					className="mt-6 rounded-xl border border-border bg-card p-4"
+					className="mt-3 rounded-xl border border-border bg-card p-4"
 				>
 					<div className="flex items-center justify-between gap-3">
 						<label
@@ -106,7 +152,7 @@ export default function FaucetPanel() {
 							Amount
 						</label>
 						<span className="text-xs tabular-nums text-muted-foreground">
-							Limit 3 per 24h
+							Limit {formatMan(MAX_PER_WINDOW)} per 24h
 						</span>
 					</div>
 
@@ -173,7 +219,7 @@ export default function FaucetPanel() {
 						{showInvalid
 							? "Enter 1, 2 or 3 MAN."
 							: isValid
-								? `You'll receive ${CLAW_FORMAT.format(multiplier * BASE_CLAIM_CLAW)} claw.`
+								? `You'll receive ${formatMan(multiplier * BASE_CLAIM)} MAN.`
 								: "Choose 1, 2 or 3 MAN."}
 					</p>
 
@@ -219,40 +265,65 @@ export default function FaucetPanel() {
 					</div>
 				</form>
 
-				<div className="min-h-5 pt-2" role="status" aria-live="polite">
+				<div className="min-h-6 pt-2" role="status" aria-live="polite">
 					<AnimatePresence mode="wait">
 						{message && (
-							<motion.p
-								key={message}
+							<motion.div
+								key={`${status}-${message}`}
 								initial={{ opacity: 0, y: 4 }}
 								animate={{ opacity: 1, y: 0 }}
 								exit={{ opacity: 0 }}
 								transition={{ duration: 0.18 }}
-								className={`flex items-start gap-1.5 text-xs leading-5 ${
-									status === "success" ? "text-primary" : "text-destructive"
-								}`}
 							>
-								{status === "success" ? (
-									<Check
-										className="mt-0.5 size-3.5 shrink-0"
-										strokeWidth={1.75}
-										aria-hidden
-									/>
-								) : (
-									<CircleAlert
-										className="mt-0.5 size-3.5 shrink-0"
-										strokeWidth={1.75}
-										aria-hidden
-									/>
+								<p
+									className={`flex items-start gap-1.5 text-xs leading-5 ${
+										status === "success"
+											? "text-primary"
+											: "text-destructive"
+									}`}
+								>
+									{status === "success" ? (
+										<Check
+											className="mt-0.5 size-3.5 shrink-0"
+											strokeWidth={1.75}
+											aria-hidden
+										/>
+									) : (
+										<CircleAlert
+											className="mt-0.5 size-3.5 shrink-0"
+											strokeWidth={1.75}
+											aria-hidden
+										/>
+									)}
+									<span>{message}</span>
+								</p>
+
+								{status === "success" && signature && (
+									<a
+										href={explorerUrl(signature)}
+										target="_blank"
+										rel="noopener noreferrer"
+										aria-label="View claim transaction on the Solana devnet explorer (opens in a new tab)"
+										className="mt-1 inline-flex items-center gap-1 text-xs text-muted-foreground underline-offset-4 transition-colors hover:text-foreground hover:underline"
+									>
+										<span className="font-mono">
+											{shortenSignature(signature)}
+										</span>
+										<ExternalLink
+											className="size-3"
+											strokeWidth={1.75}
+											aria-hidden
+										/>
+									</a>
 								)}
-								<span>{message}</span>
-							</motion.p>
+							</motion.div>
 						)}
 					</AnimatePresence>
 				</div>
 
 				<p className="mt-1 text-xs leading-5 text-muted-foreground">
-					Claims are capped at 3 MAN per wallet every 24 hours. Devnet only.
+					Claims are capped at {formatMan(MAX_PER_WINDOW)} MAN per wallet
+					every 24 hours. Devnet only.
 				</p>
 			</section>
 		</main>

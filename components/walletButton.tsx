@@ -22,10 +22,10 @@ const shortenAddress = (address: string) =>
 	`${address.slice(0, 4)}…${address.slice(-4)}`;
 
 const CHROME =
-	"inline-flex h-8 items-center gap-1.5 rounded-full border border-border bg-card/80 px-3 text-[13px] font-medium text-foreground shadow-[0_1px_2px_rgb(24_27_24/6%)] backdrop-blur-md transition-colors";
+	"inline-flex h-10 items-center gap-1.5 rounded-xl border border-border bg-card/80 px-3 text-[13px] font-medium text-foreground shadow-[0_1px_2px_rgb(24_27_24/6%)] backdrop-blur-md transition-colors cursor-pointer";
 
 const MENU_ITEM =
-	"flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-[13px] transition-colors hover:bg-foreground/[0.05]";
+	"flex w-full items-center gap-2 rounded-xl px-2 py-1.5 text-left text-[13px] transition-colors hover:bg-foreground/[0.05] cursor-pointer";
 
 export default function WalletButton() {
 	const { publicKey, connected, connecting, disconnect } = useWallet();

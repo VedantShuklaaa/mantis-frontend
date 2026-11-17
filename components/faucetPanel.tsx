@@ -121,7 +121,7 @@ export default function FaucetPanel() {
 	return (
 		<main className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center px-5 pb-16 pt-24">
 			<section>
-				<h1 className="text-balance text-2xl font-semibold tracking-tight sm:text-3xl">
+				<h1 className="text-balance text-2xl font-semibold tracking-tight sm:text-4xl">
 					Claim devnet MAN
 				</h1>
 				<p className="mt-2 max-w-sm text-sm leading-6 text-muted-foreground">
@@ -197,7 +197,7 @@ export default function FaucetPanel() {
 										onClick={() => pick(n)}
 										disabled={pending}
 										aria-pressed={selected}
-										className={`h-8 w-8 rounded-md text-sm tabular-nums transition-colors disabled:opacity-50 ${
+										className={`h-8 w-8 rounded-md text-sm tabular-nums transition-colors border border-zinc-200 cursor-pointer disabled:opacity-50 ${
 											selected
 												? "bg-foreground text-background"
 												: "text-muted-foreground hover:bg-foreground/[0.05] hover:text-foreground"

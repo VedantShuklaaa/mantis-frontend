@@ -20,6 +20,7 @@ const MAX_BODY_BYTES = 100 * 1024;
 const UPSTREAM_TIMEOUT_MS = 15_000;
 const RATE_LIMIT_WINDOW_MS = 60_000;
 const RATE_LIMIT_MAX_REQUESTS = 120;
+const MAX_BATCH_SIZE = 20;
 
 const ALLOWED_METHODS = new Set([
 	"getLatestBlockhash",
@@ -228,6 +229,10 @@ export async function POST(request: NextRequest): Promise<Response> {
 		return errorResponse(null, -32600, "Empty batch.", 400);
 	}
 
+	if (batch && batch.length > MAX_BATCH_SIZE) {
+		return errorResponse(null, -32600, "Batch too large.", 413);
+	}
+
 	const isBatch = batch !== null;
 	const candidates: unknown[] = batch ?? [parsed];
 	const upstream = process.env.RPC_URL?.trim() || PUBLIC_DEVNET_RPC;
@@ -289,10 +294,10 @@ export async function POST(request: NextRequest): Promise<Response> {
 	if (validEntries.length === 0) {
 		const body = isBatch
 			? JSON.stringify(
-					[...rejected.entries()]
-						.sort(([a], [b]) => a - b)
-						.map(([, error]) => error),
-				)
+				[...rejected.entries()]
+					.sort(([a], [b]) => a - b)
+					.map(([, error]) => error),
+			)
 			: JSON.stringify(rejected.get(0));
 		return new Response(body, {
 			status: 200,

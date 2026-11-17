@@ -72,6 +72,12 @@ const nextConfig: NextConfig = {
         // basePath is applied automatically, so this covers /mantis/*
         source: "/:path*",
         headers: securityHeaders,
+      }, {
+        source: "/:file(man\\.svg|man\\.json)",
+        headers: [
+          { key: "Cross-Origin-Resource-Policy", value: "cross-origin" },
+          { key: "Access-Control-Allow-Origin", value: "*" },
+        ],
       },
     ];
   },

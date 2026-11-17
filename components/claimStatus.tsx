@@ -47,9 +47,9 @@ export default function ClaimStatus({
 			initial={{ opacity: 0, y: 4 }}
 			animate={{ opacity: 1, y: 0 }}
 			transition={{ duration: 0.2 }}
-			className="overflow-hidden rounded-xl border border-border bg-card"
+			className="overflow-hidden rounded-xl bg-card"
 		>
-			<dl className="grid grid-cols-3 divide-x divide-border">
+			<dl className="grid grid-cols-3 divide-x divide-zinc-300">
 				{items.map((item) => (
 					<div key={item.label} className="px-3 py-3">
 						<dt className="text-[11px] uppercase tracking-wide text-muted-foreground">

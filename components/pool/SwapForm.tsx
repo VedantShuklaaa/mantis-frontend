@@ -30,6 +30,7 @@ import {
 import { readableError, swapTx } from "@/lib/amm/tx";
 import { toast } from "./Toast";
 import SlippagePopover from "./SlippagePopover";
+import Image from "next/image";
 
 type Props = {
   side: "buy" | "sell";
@@ -37,18 +38,23 @@ type Props = {
   onSlippage: (bps: number) => void;
 };
 
-function TokenChip({ symbol }: { symbol: "SOL" | "MAN" }) {
+export type TokenSymbol = "SOL" | "MAN";
+
+export const TOKEN_ICONS: Record<TokenSymbol, string> = {
+  MAN: "/mantis/token/mantis.svg",
+  SOL: "/mantis/token/solana.svg",
+};
+
+function TokenChip({ symbol }: { symbol: TokenSymbol }) {
   return (
     <span className="flex shrink-0 items-center gap-1.5 rounded-full border border-pool-border bg-pool-bg px-2.5 py-1.5 text-xs font-medium text-pool-text">
-      <span
-        className={`grid size-4 place-items-center rounded-full text-[8px] font-bold ${
-          symbol === "MAN"
-            ? "bg-pool-accent text-pool-bg"
-            : "bg-[linear-gradient(135deg,#7c3aed,#0b8a5f)] text-white"
-        }`}
-      >
-        {symbol === "MAN" ? "M" : "◎"}
-      </span>
+      <Image
+        src={TOKEN_ICONS[symbol]}
+        alt={symbol}
+        width={16}
+        height={16}
+        className="size-4 rounded-full object-cover"
+      />
       {symbol}
     </span>
   );
@@ -282,9 +288,8 @@ export default function SwapForm({ side, slippageBps, onSlippage }: Props) {
         <div className="flex items-center justify-between gap-3">
           <span className="text-pool-muted">Price Impact</span>
           <span
-            className={`font-mono ${
-              impactBps > 100 ? "text-pool-danger" : "text-pool-text"
-            }`}
+            className={`font-mono ${impactBps > 100 ? "text-pool-danger" : "text-pool-text"
+              }`}
           >
             {amountBase > 0n ? impactLabel : "—"}
           </span>
@@ -311,11 +316,10 @@ export default function SwapForm({ side, slippageBps, onSlippage }: Props) {
         type="button"
         onClick={action}
         disabled={disabled}
-        className={`flex h-11 w-full items-center justify-center gap-2 rounded-xl text-sm font-semibold transition-all ${
-          disabled
+        className={`flex h-11 w-full items-center justify-center gap-2 rounded-xl text-sm font-semibold transition-all ${disabled
             ? "cursor-not-allowed bg-black/[0.05] text-pool-muted"
             : "bg-pool-accent text-pool-bg hover:brightness-95 active:scale-[0.99]"
-        }`}
+          }`}
       >
         {submitting ? <Loader2 className="size-4 animate-spin" /> : null}
         {label}

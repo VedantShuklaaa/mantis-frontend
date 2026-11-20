@@ -4,6 +4,12 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Tailwind v4 preflight leaves buttons with the default arrow cursor. */
+button:not(:disabled),
+[role="button"]:not([aria-disabled="true"]) {
+  cursor: pointer;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -38,6 +44,15 @@
   --color-chart-3: var(--chart-3);
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
+
+  --color-pool-bg: var(--pool-bg);
+  --color-pool-panel: var(--pool-panel);
+  --color-pool-raised: var(--pool-raised);
+  --color-pool-border: var(--pool-border);
+  --color-pool-text: var(--pool-text);
+  --color-pool-muted: var(--pool-muted);
+  --color-pool-accent: var(--pool-accent);
+  --color-pool-danger: var(--pool-danger);
 
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system,
     "Segoe UI", sans-serif;
@@ -105,6 +120,130 @@
   --radius: 0.5rem;
 }
 
+/*
+ * The trading surface is a self-contained light terminal. Its tokens are
+ * scoped to the shell so the rest of the site keeps its palette.
+ */
+.pool-shell {
+  color-scheme: light;
+
+  --pool-bg: #f7f7f4;
+  --pool-panel: #ffffff;
+  --pool-raised: #ffffff;
+
+  --pool-border: #e2e2da;
+  --pool-text: #16161a;
+  --pool-muted: #6b6b73;
+  --pool-accent: #3f7d20;
+  --pool-danger: #d92d20;
+}
+
+body:has(.pool-shell) {
+  background: #f7f7f4;
+  color-scheme: light;
+}
+
+body:has(.pool-shell)>footer {
+  display: none;
+}
+
+.pool-shell ::selection {
+  background: color-mix(in oklab, var(--pool-accent) 26%, transparent);
+  color: var(--pool-text);
+}
+
+.pool-range {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 16px;
+  border-radius: 9999px;
+  background: linear-gradient(to right,
+      var(--pool-accent) 0%,
+      var(--pool-accent) var(--pct, 0%),
+      #e2e2da var(--pct, 0%),
+      #e2e2da 100%) center / 100% 4px no-repeat;
+  outline: none;
+  cursor: pointer;
+}
+
+.pool-range:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pool-range::-webkit-slider-runnable-track {
+  height: 4px;
+  background: transparent;
+}
+
+.pool-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  margin-top: -5px;
+  border-radius: 9999px;
+  border: 2px solid #ffffff;
+  background: var(--pool-accent);
+  box-shadow: 0 0 0 1px rgb(22 22 26 / 18%);
+}
+
+.pool-range::-moz-range-track {
+  height: 4px;
+  background: transparent;
+}
+
+.pool-range::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border-radius: 9999px;
+  border: 2px solid #ffffff;
+  background: var(--pool-accent);
+  box-shadow: 0 0 0 1px rgb(22 22 26 / 18%);
+}
+
+/* Wallet modal follows the pool palette while the trading route is mounted. */
+html[data-pool="true"] .wallet-adapter-modal .wallet-adapter-modal-wrapper {
+  background: #111114;
+  color: #e7e7ea;
+  border: 1px solid #1c1c21;
+  box-shadow: 0 24px 60px -24px rgb(0 0 0 / 70%);
+}
+
+html[data-pool="true"] .wallet-adapter-modal .wallet-adapter-modal-title {
+  color: #e7e7ea;
+}
+
+html[data-pool="true"] .wallet-adapter-modal .wallet-adapter-modal-list .wallet-adapter-button {
+  color: #e7e7ea;
+}
+
+html[data-pool="true"] .wallet-adapter-modal .wallet-adapter-button:not([disabled]):hover {
+  background-color: #1c1c21;
+  color: #ffffff;
+}
+
+html[data-pool="true"] .wallet-adapter-modal .wallet-adapter-modal-button-close {
+  background: #1c1c21;
+}
+
+html[data-pool="true"] .wallet-adapter-modal .wallet-adapter-modal-button-close svg {
+  fill: #8a8a92;
+}
+
+html[data-pool="true"] .wallet-adapter-modal .wallet-adapter-modal-middle-button {
+  background: #abf47d;
+  color: #0b0b0d;
+}
+
+html[data-pool="true"] .wallet-adapter-modal .wallet-adapter-modal-list-more {
+  color: #8a8a92;
+}
+
+html[data-pool="true"] .wallet-adapter-modal .wallet-adapter-modal-overlay {
+  background: rgb(0 0 0 / 62%);
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -133,6 +272,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+
   *,
   ::before,
   ::after {

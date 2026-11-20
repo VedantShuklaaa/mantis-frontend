@@ -20,7 +20,7 @@ const MAX_BODY_BYTES = 100 * 1024;
 const UPSTREAM_TIMEOUT_MS = 15_000;
 const RATE_LIMIT_WINDOW_MS = 60_000;
 const RATE_LIMIT_MAX_REQUESTS = 120;
-const MAX_BATCH_SIZE = 20;
+const MAX_BATCH_SIZE = 50;
 
 const ALLOWED_METHODS = new Set([
 	"getLatestBlockhash",
@@ -32,6 +32,8 @@ const ALLOWED_METHODS = new Set([
 	"getBalance",
 	"getTokenAccountBalance",
 	"getTokenAccountsByOwner",
+	"getTokenSupply",
+	"getSignaturesForAddress",
 	"getSignatureStatuses",
 	"getTransaction",
 	"getFeeForMessage",
@@ -235,13 +237,15 @@ export async function POST(request: NextRequest): Promise<Response> {
 
 	const isBatch = batch !== null;
 	const candidates: unknown[] = batch ?? [parsed];
-	const upstream = process.env.RPC_URL?.trim() || PUBLIC_DEVNET_RPC;
+	const configuredRpc =
+		process.env.RPC_URL?.trim() || process.env.NEXT_PUBLIC_RPC_URL?.trim();
+	const upstream = configuredRpc || PUBLIC_DEVNET_RPC;
 
-	if (!process.env.RPC_URL?.trim() && !warnedAboutFallbackRpc) {
+	if (!configuredRpc && !warnedAboutFallbackRpc) {
 		warnedAboutFallbackRpc = true;
 		// Logged once per server instance. Deliberately excludes the URL itself.
 		console.warn(
-			"[api/rpc] RPC_URL is empty; using the public Solana devnet RPC. Set RPC_URL for production traffic.",
+			"[api/rpc] No RPC URL is configured; using the public Solana devnet RPC. Set RPC_URL for production traffic.",
 		);
 	}
 

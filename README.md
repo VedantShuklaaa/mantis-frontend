@@ -61,6 +61,38 @@ cp ../man-faucet/target/types/man_faucet.ts lib/idl/man_faucet.ts
 
 Keep `lib/constants.ts` in sync with the program's `constants.rs`.
 
+## Pool UI
+
+The MAN/SOL trading interface is served at `/pool`.
+
+### Setup
+
+Set `NEXT_PUBLIC_RPC_URL` (or the server-only `RPC_URL`) in `.env`. Browser
+traffic goes through the same-origin proxy in `app/api/rpc/route.ts`; leaving
+both empty uses the public Solana devnet RPC.
+
+- Cluster: Solana devnet
+- Program: `DwMeAF9UFscahiqeYKr1CmKhEwdp9TBxihGbcK5YqJFm`
+- MAN mint: `9JyKSkrvCcwivA2W12zgNDSAmgpDH6fdfaioCYYBJ3vs` (6 decimals)
+- wSOL mint: `So11111111111111111111111111111111111111112` (9 decimals)
+
+### Features
+
+- Candlestick chart built from pool vault history, with 1m/5m/15m/1h buckets
+  and a live last candle.
+- Buy/sell swaps with fee-aware quotes, price impact, slippage, min received,
+  and a SOL fee reserve.
+- Native SOL wrap/unwrap, LP add/remove with pool-ratio fills, positions, and
+  recent program history with Solscan links.
+
+The IDL in `lib/idl/man_amm.json` and `lib/idl/man_amm.ts` must be re-copied
+from the program repository after each program build:
+
+```bash
+cp ../man-amm/target/idl/man_amm.json lib/idl/man_amm.json
+cp ../man-amm/target/types/man_amm.ts lib/idl/man_amm.ts
+```
+
 ## Production
 
 ```bash

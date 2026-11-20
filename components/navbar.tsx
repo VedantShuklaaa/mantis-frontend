@@ -11,7 +11,7 @@ type NavItem = { label: string; href: string; soon?: boolean };
 
 const NAV_ITEMS: NavItem[] = [
 	{ label: "Faucet", href: "/faucet" },
-	{ label: "Pool", href: "/amm", soon: true },
+	{ label: "Pool", href: "/pool" },
 	{ label: "docs", href: "/docs", soon: true },
 ];
 

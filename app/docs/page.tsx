@@ -1,18 +1,18 @@
-// app/amm/page.tsx
+// app/docs/page.tsx
 import type { Metadata } from "next";
-import ComingSoonDocs from "@/components/comingSoonDocs";
+import Docs from "@/components/docs";
 import { absoluteUrl, socialMetadata } from "@/lib/site";
 
 const DESCRIPTION =
-	"The MAN/SOL pool is in development on Solana devnet. Use the faucet to get test MAN.";
+	"Reference for the MAN/SOL pool on Solana devnet: swaps, liquidity, charts, and wrapping SOL.";
 
 export const metadata: Metadata = {
-	title: "MAN/SOL pool",
+	title: "MAN/SOL pool docs",
 	description: DESCRIPTION,
-	alternates: { canonical: absoluteUrl("/amm") },
-	...socialMetadata("MAN/SOL pool", DESCRIPTION, "/amm"),
+	alternates: { canonical: absoluteUrl("/docs") },
+	...socialMetadata("MAN/SOL pool docs", DESCRIPTION, "/docs"),
 };
 
-export default function AmmPage() {
-	return <ComingSoonDocs />;
+export default function DocsPage() {
+	return <Docs />;
 }

@@ -7,12 +7,12 @@ import { motion } from "motion/react";
 import WalletButton from "@/components/walletButton";
 import { BASE_PATH } from "@/lib/site";
 
-type NavItem = { label: string; href: string; soon?: boolean };
+type NavItem = { label: string; href: string };
 
 const NAV_ITEMS: NavItem[] = [
 	{ label: "Faucet", href: "/faucet" },
 	{ label: "Pool", href: "/pool" },
-	{ label: "docs", href: "/docs", soon: true },
+	{ label: "Docs", href: "/docs" },
 ];
 
 export default function Navbar() {

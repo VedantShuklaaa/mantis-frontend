@@ -1,4 +1,4 @@
-// components/comingSoonDocs/sidebar.tsx
+// components/docs/sidebar.tsx
 "use client";
 
 import { SECTIONS } from "@/lib/ammDocs";
@@ -10,7 +10,7 @@ export default function Sidebar() {
 				On this page
 			</p>
 			<ul className="space-y-1.5 border-l border-border">
-				{[...SECTIONS, { id: "status", title: "Status" }].map((s) => (
+				{SECTIONS.map((s) => (
 					<li key={s.id}>
 						<a
 							href={`#${s.id}`}

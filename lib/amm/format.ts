@@ -67,12 +67,12 @@ export function formatInput(
   return fractionText ? `${whole.toString()}.${fractionText}` : whole.toString();
 }
 
-export function formatPrice(value: number): string {
+export function formatPrice(value: number, fractionDigits = 6): string {
   if (!Number.isFinite(value) || value <= 0) return "—";
 
   return value.toLocaleString("en-US", {
-    minimumFractionDigits: 6,
-    maximumFractionDigits: 6,
+    minimumFractionDigits: fractionDigits,
+    maximumFractionDigits: fractionDigits,
   });
 }
 

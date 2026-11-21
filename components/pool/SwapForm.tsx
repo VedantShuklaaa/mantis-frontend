@@ -27,7 +27,7 @@ import {
   quoteSwap,
   withSlippage,
 } from "@/lib/amm/math";
-import { readableError, swapTx } from "@/lib/amm/tx";
+import { initializePoolTx, readableError, swapTx } from "@/lib/amm/tx";
 import { toast } from "./Toast";
 import SlippagePopover from "./SlippagePopover";
 import Image from "next/image";
@@ -174,6 +174,35 @@ export default function SwapForm({ side, slippageBps, onSlippage }: Props) {
     }
   };
 
+  const handleInitialize = async () => {
+    if (!wallet.publicKey) {
+      setVisible(true);
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const signature = await initializePoolTx(connection, wallet);
+
+      toast({
+        type: "success",
+        title: "Pool initialized",
+        message: "Add liquidity to set the starting price.",
+        href: solscanTx(signature),
+      });
+
+      await refresh();
+    } catch (cause) {
+      toast({
+        type: "error",
+        title: "Initialize failed",
+        message: readableError(cause),
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   let label = payingSol ? "Buy MAN" : "Sell MAN";
   let disabled = false;
   let action: () => void | Promise<void> = handleSwap;
@@ -182,11 +211,11 @@ export default function SwapForm({ side, slippageBps, onSlippage }: Props) {
     label = "Connect Wallet";
     action = () => setVisible(true);
   } else if (submitting) {
-    label = "Swapping…";
+    label = pool.initialized ? "Swapping…" : "Initializing…";
     disabled = true;
   } else if (!pool.initialized) {
-    label = "Pool not initialized";
-    disabled = true;
+    label = "Initialize pool";
+    action = handleInitialize;
   } else if (zero) {
     label = "Enter amount";
     disabled = true;
@@ -317,8 +346,8 @@ export default function SwapForm({ side, slippageBps, onSlippage }: Props) {
         onClick={action}
         disabled={disabled}
         className={`flex h-11 w-full items-center justify-center gap-2 rounded-xl text-sm font-semibold transition-all ${disabled
-            ? "cursor-not-allowed bg-black/[0.05] text-pool-muted"
-            : "bg-pool-accent text-pool-bg hover:brightness-95 active:scale-[0.99]"
+          ? "cursor-not-allowed bg-black/[0.05] text-pool-muted"
+          : "bg-pool-accent text-pool-bg hover:brightness-95 active:scale-[0.99]"
           }`}
       >
         {submitting ? <Loader2 className="size-4 animate-spin" /> : null}

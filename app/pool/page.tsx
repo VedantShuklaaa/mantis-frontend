@@ -30,7 +30,7 @@ function PoolScreen() {
   const { pool, poolLoading } = usePoolData();
   const [timeframe, setTimeframe] = useState<Timeframe>(DEFAULT_TIMEFRAME);
   const [tab, setTab] = useState<Tab>("positions");
-  const { candles, stats, loading } = useCandles(pool, timeframe);
+  const { candles, stats, loading, error } = useCandles(pool, timeframe);
 
   return (
     <main className="pool-shell min-h-svh bg-pool-bg text-pool-text">
@@ -48,6 +48,7 @@ function PoolScreen() {
               timeframe={timeframe}
               onTimeframe={setTimeframe}
               loading={loading}
+              error={error}
             />
           </section>
 

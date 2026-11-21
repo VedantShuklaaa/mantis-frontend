@@ -25,6 +25,7 @@ import {
   type PoolState,
 } from "./constants";
 import { ComputeBudgetProgram } from "@solana/web3.js";
+import { confirmSignature } from "@/lib/confirmSignature";
 import { authorityPda, lockedLpPda, lpMintPda, poolPda, vaultPda } from "./pda";
 import { writeProgram } from "./program";
 
@@ -72,18 +73,13 @@ async function send(
   }
 
   try {
-    const confirmation = await connection.confirmTransaction(
-      {
-        signature,
-        blockhash: latest.blockhash,
-        lastValidBlockHeight: latest.lastValidBlockHeight,
-      },
-      "confirmed",
-    );
-
-    if (confirmation.value.err) {
-      throw new Error("The transaction failed on-chain.");
-    }
+    /*
+     * The proxy has no WebSocket endpoint, so `confirmTransaction` cannot work
+     * here. Poll instead; see `lib/confirmSignature.ts`.
+     */
+    await confirmSignature(connection, signature, {
+      lastValidBlockHeight: latest.lastValidBlockHeight,
+    });
   } catch (error) {
     throw new Error(readableError(error));
   }

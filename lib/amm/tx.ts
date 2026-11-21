@@ -431,7 +431,6 @@ export async function initializePoolTx(
 
   const program = writeProgram(connection, wallet as unknown as AnchorWallet);
   const pool = poolPda(MINT_A, MINT_B);
-  console.log("pool PDA", pool.toBase58());
 
   const initIx = await program.methods
     .initializePool(feeBps)
@@ -450,7 +449,6 @@ export async function initializePoolTx(
     } as never)
     .instruction();
 
-  console.log("sending initialize tx");
   return send(connection, wallet, [
     ComputeBudgetProgram.setComputeUnitLimit({ units: 400_000 }),
     initIx,

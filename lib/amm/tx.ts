@@ -24,7 +24,8 @@ import {
   WSOL_MINT,
   type PoolState,
 } from "./constants";
-import { lockedLpPda } from "./pda";
+import { ComputeBudgetProgram } from "@solana/web3.js";
+import { authorityPda, lockedLpPda, lpMintPda, poolPda, vaultPda } from "./pda";
 import { writeProgram } from "./program";
 
 function ataFor(mint: PublicKey, owner: PublicKey): PublicKey {
@@ -422,4 +423,38 @@ export function readableError(error: unknown): string {
   }
 
   return raw.split("\n")[0].slice(0, 160);
+}
+
+export async function initializePoolTx(
+  connection: Connection,
+  wallet: WalletContextState,
+  feeBps: number = 30,
+): Promise<string> {
+  const owner = wallet.publicKey;
+  if (!owner) throw new Error("Connect a wallet to continue.");
+
+  const program = writeProgram(connection, wallet as unknown as AnchorWallet);
+  const pool = poolPda(MINT_A, MINT_B);
+
+  const initIx = await program.methods
+    .initializePool(feeBps)
+    .accounts({
+      payer: owner,
+      mintA: MINT_A,
+      mintB: MINT_B,
+      pool,
+      poolAuthority: authorityPda(pool),
+      vaultA: vaultPda(pool, MINT_A),
+      vaultB: vaultPda(pool, MINT_B),
+      lpMint: lpMintPda(pool),
+      lockedLp: lockedLpPda(pool),
+      systemProgram: SystemProgram.programId,
+      tokenProgram: TOKEN_PROGRAM_ID,
+    } as never)
+    .instruction();
+
+  return send(connection, wallet, [
+    ComputeBudgetProgram.setComputeUnitLimit({ units: 400_000 }),
+    initIx,
+  ]);
 }

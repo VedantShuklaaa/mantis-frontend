@@ -1,4 +1,4 @@
-// components/comingSoonDocs/section.tsx
+// components/docs/section.tsx
 "use client";
 
 import { motion } from "motion/react";
